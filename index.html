@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PRIME Admin — Reporting</title>
+
+<!-- Fonts actually used: Roboto (chrome, labels), Roboto Flex (values, chips) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Roboto+Flex:opsz,wght@8..144,400..700&display=swap" rel="stylesheet">
+<!-- Icons actually used: magnify, plus, bell-outline, chevron-left/right/up/down, menu-up, menu-down,
+     close, checkbox-marked, checkbox-blank-outline, download, cog-play-outline, loading, table-eye,
+     account-box-outline, chart-line, view-dashboard, chart-box-outline, tools, account-key-outline -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
+
+<style>
+/* ---------- PrimeAdmin 3 tokens (subset in use) ---------- */
+:root{
+  --pa-primary:#1976d2; --pa-primary-700:#1147a1; --pa-primary-050:#eef5fc;
+  --pa-primary-12a:rgba(25,118,210,.12); --pa-primary-04a:rgba(25,118,210,.04);
+  --pa-aqua-500:#00adee;
+  --pa-ink:#212121; --pa-ink-2:#424242; --pa-ink-3:#666; --pa-ink-4:#717171; --pa-ink-6:#89939e; --pa-ink-7:#9e9e9e;
+  --pa-band:#f0f0f0; --pa-line:#eee; --pa-line-2:#e0e0e0; --pa-divider:rgba(0,0,0,.12); --pa-rule:rgba(0,0,0,.6);
+  --pa-sidebar-bg:#202020; --pa-sidebar-active:#3e3e3e; --pa-avatar-green:#4caf50;
+  --pa-field-line:rgba(0,0,0,.42); --pa-field-focus:#000;
+  --pa-success:#2e7d32; --pa-error:#d32f2f;
+  --pa-font-sans:"Roboto",system-ui,sans-serif; --pa-font-display:"Roboto Flex","Roboto",system-ui,sans-serif;
+  --pa-radius-sm:4px; --pa-radius-pill:16px;
+  --pa-elev-1:0 1px 2px 0 rgba(0,0,0,.05),0 1px 1px -1px rgba(0,0,0,.05);
+  --pa-elev-2:0 1px 5px 0 rgba(0,0,0,.12),0 2px 2px 0 rgba(0,0,0,.14),0 3px 1px -2px rgba(0,0,0,.2);
+  --pa-elev-card:0 10px 13px -5px rgba(0,0,0,.05),0 4px 5px -6px rgba(0,0,0,.05);
+  --pa-elev-raised:0 20px 25px -5px rgba(0,0,0,.1),0 8px 10px -6px rgba(0,0,0,.1);
+  --pa-elev-modal:0 9px 46px 8px rgba(0,0,0,.12),0 24px 38px 3px rgba(0,0,0,.14),0 11px 15px -7px rgba(0,0,0,.2);
+}
+*{box-sizing:border-box}
+body{margin:0;background:#fff;color:var(--pa-ink);font-family:var(--pa-font-sans)}
+a{color:var(--pa-primary);text-decoration:none}
+a:hover{color:var(--pa-primary-700)}
+@keyframes pa-spin{to{transform:rotate(360deg)}}
+
+/* ---------- type roles ---------- */
+.pa-page-title{font-weight:400;font-size:26px;line-height:34px;letter-spacing:1.3px;text-transform:uppercase;color:var(--pa-primary);margin:0}
+.pa-rail-title{font-weight:400;font-size:19px;line-height:26px;letter-spacing:.4px;text-transform:uppercase;color:var(--pa-ink);margin:0}
+.pa-band-title{font-weight:400;font-size:18px;line-height:26px;letter-spacing:.3px;text-transform:uppercase;color:var(--pa-ink);margin:0}
+.pa-body-14{font-size:14px;line-height:20px}
+.pa-body-13{font-size:13.5px;line-height:20px}
+.pa-caption{font-size:11.5px;line-height:16px;color:var(--pa-ink-3)}
+.pa-field-label--float{font-size:11.5px;line-height:16px;color:var(--pa-ink-3)}
+.pa-input-text{font-family:var(--pa-font-display);font-size:13.5px;line-height:20px;color:var(--pa-ink)}
+
+/* ---------- buttons ---------- */
+.pa-btn{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:8px;height:36px;padding:0 16px;border:0;border-radius:var(--pa-radius-sm);
+  font-family:var(--pa-font-sans);font-weight:500;font-size:12px;line-height:1;letter-spacing:.4px;text-transform:uppercase;cursor:pointer;
+  transition:background 150ms cubic-bezier(.4,0,.2,1),box-shadow 150ms cubic-bezier(.4,0,.2,1)}
+.pa-btn::after{content:"";position:absolute;inset:0;border-radius:inherit;background:transparent;pointer-events:none}
+.pa-btn>*{position:relative}
+.pa-btn--lg{height:40px;padding:0 20px}
+.pa-btn--primary{background:var(--pa-primary);color:#fff;box-shadow:var(--pa-elev-2)}
+.pa-btn--primary:hover::after{background:rgba(255,255,255,.08)}
+.pa-btn--primary:active::after{background:rgba(0,0,0,.24)}
+.pa-btn--secondary{background:#fff;color:var(--pa-primary);border:1px solid var(--pa-primary)}
+.pa-btn--secondary:hover::after{background:var(--pa-primary-04a)}
+.pa-btn[disabled]{opacity:.3;pointer-events:none;box-shadow:none}
+.pa-btn i{font-size:18px}
+
+/* ---------- app chrome ---------- */
+.topbar{height:56px;background:#fff;border-bottom:1px solid var(--pa-divider);display:flex;align-items:center;padding:0 24px;gap:16px;flex-shrink:0}
+.topbar__btn{width:36px;height:36px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:var(--pa-ink-2);border:none;background:transparent;cursor:pointer}
+.topbar__btn:hover{background:rgba(0,0,0,.04)}
+.search{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 12px;background:#fff;border:1px solid var(--pa-divider);border-radius:var(--pa-radius-sm)}
+.search input{border:none;outline:none;background:transparent;font-family:var(--pa-font-display);font-size:13px;flex:1;min-width:0;color:var(--pa-ink)}
+.search input::placeholder{color:var(--pa-ink-6)}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--pa-avatar-green);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:500}
+.sb{width:230px;flex-shrink:0;background:var(--pa-sidebar-bg);color:#fff;display:flex;flex-direction:column;overflow-y:auto;transition:width 150ms cubic-bezier(.4,0,.2,1)}
+.sb--collapsed{width:68px}
+.sb__head{padding:18px 14px;display:flex;align-items:center;justify-content:space-between}
+.sb__logo{height:22px;width:auto}
+.sb__collapse{color:rgba(255,255,255,.6);cursor:pointer}
+.sb__section{padding:4px 0}
+.sb__item{display:flex;align-items:center;gap:14px;padding:12px 18px;font-size:14px;color:rgba(255,255,255,.9);cursor:pointer;user-select:none}
+.sb__item i{font-size:20px}
+.sb__item__chev{margin-left:auto;font-size:18px;opacity:.6}
+.sb__item--active{background:var(--pa-sidebar-active)}
+.sb__item:hover:not(.sb__item--active){background:rgba(255,255,255,.06)}
+.sb__sub{padding:2px 0 8px}
+.sb__sub-item{display:flex;padding:8px 18px 8px 54px;font-size:13px;color:rgba(255,255,255,.72);cursor:pointer}
+.sb__sub-item--active{background:var(--pa-sidebar-active);color:#fff}
+.sb__sub-item:hover:not(.sb__sub-item--active){color:#fff}
+.sb--collapsed .sb__logo,.sb--collapsed .sb__label,.sb--collapsed .sb__item__chev,.sb--collapsed .sb__sub{display:none}
+
+/* ---------- surfaces ---------- */
+.pa-card{background:#fff;border:1px solid var(--pa-divider);border-radius:var(--pa-radius-sm);box-shadow:var(--pa-elev-1)}
+.pa-card--form{box-shadow:var(--pa-elev-card)}
+.pa-band{background:var(--pa-band);padding:12px 16px;display:flex;align-items:center;gap:12px}
+.pa-empty{border:1px solid var(--pa-line);border-radius:var(--pa-radius-sm);display:flex;flex-direction:column;align-items:center;padding:40px 24px;text-align:center}
+.pa-empty i{font-size:48px;color:var(--pa-ink-7)}
+.pa-empty__title{font-size:18px;margin-top:14px}
+.pa-empty__body{font-size:13.5px;line-height:20px;color:var(--pa-ink-3);margin-top:6px;max-width:420px}
+
+/* ---------- fields ---------- */
+.field{position:relative}
+.field__control{display:flex;align-items:center;gap:10px;min-width:0;min-height:30px;padding:4px 0 7px;border-bottom:1px solid var(--pa-field-line);cursor:pointer}
+.field__input{width:100%;border:0;border-bottom:1px solid var(--pa-field-line);background:transparent;outline:none;padding:4px 0 7px;
+  font-family:var(--pa-font-display);font-size:13.5px;line-height:20px;color:var(--pa-ink)}
+.field__input:focus{border-bottom:2px solid var(--pa-field-focus);padding-bottom:6px}
+.field__input::placeholder{color:var(--pa-ink-6)}
+.menu{position:absolute;top:calc(100% + 2px);left:0;right:0;z-index:21;background:#fff;border:1px solid var(--pa-divider);border-radius:var(--pa-radius-sm);
+  box-shadow:var(--pa-elev-modal);padding:6px 0;max-height:340px;overflow-y:auto}
+.menu__item{display:flex;align-items:center;gap:12px;padding:12px 24px;font-size:14px;cursor:pointer}
+.menu__item:hover{background:var(--pa-primary-04a)}
+.menu__item--on{background:var(--pa-primary-12a)}
+.scrim{position:fixed;inset:0;z-index:20}
+.chip{display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 4px 0 10px;border-radius:var(--pa-radius-pill);
+  background:var(--pa-primary-050);color:var(--pa-ink);font-family:var(--pa-font-display);font-size:12.5px;line-height:24px;
+  white-space:nowrap;min-width:0;max-width:100%;overflow:hidden}
+.chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip i{flex:0 0 auto;font-size:16px;cursor:pointer;color:var(--pa-ink-2)}
+.chip i:hover{color:var(--pa-ink)}
+
+/* ---------- paginated list table ---------- */
+.pa-ltable{width:100%;border-collapse:collapse}
+.pa-ltable th{padding:14px;text-align:left;font-size:14px;font-weight:400;color:var(--pa-ink);white-space:nowrap;border-top:1px solid var(--pa-rule);border-bottom:1px solid var(--pa-rule)}
+.pa-ltable td{padding:14px;font-size:13.5px;color:var(--pa-ink);border-bottom:1px solid var(--pa-line);vertical-align:top}
+.pa-ltable tbody tr:hover{background:rgba(33,33,33,.02)}
+.pa-ltable .num{color:var(--pa-ink-2)}
+.pa-ltable .desc{font-size:12.5px;line-height:18px;color:var(--pa-ink-2);text-wrap:pretty}
+.pa-tablebar{display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:6px 0 10px;font-size:13px;color:var(--pa-ink-2)}
+.pa-tablebar--footer{padding:12px 0 0;border-top:1px solid var(--pa-rule)}
+.pa-tablebar select{height:34px;border:1px solid var(--pa-line);border-radius:var(--pa-radius-sm);background:#fff;font-family:var(--pa-font-sans);font-size:13px;color:var(--pa-ink);padding:0 8px}
+.pa-pager{display:flex;align-items:center;gap:4px;margin-left:auto}
+.pa-pager button{min-width:30px;height:30px;padding:0 6px;border:none;border-radius:var(--pa-radius-sm);background:transparent;font-family:var(--pa-font-sans);font-size:13px;color:var(--pa-ink-2);cursor:pointer}
+.pa-pager button:hover{background:rgba(33,33,33,.06)}
+.pa-pager button[aria-current="page"]{background:var(--pa-primary-12a);color:var(--pa-primary);font-weight:500}
+.pa-pager button[disabled]{opacity:.3;pointer-events:none}
+.pa-status{display:inline-flex;align-items:center;gap:7px;font-size:12.5px}
+.pa-status::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor;flex:0 0 auto}
+
+/* ---------- toast ---------- */
+.pa-toast{position:fixed;right:32px;bottom:28px;z-index:60;display:flex;align-items:center;gap:10px;min-height:48px;padding:12px 18px;background:#fff;
+  border-left:4px solid var(--pa-success);border-radius:var(--pa-radius-sm);box-shadow:var(--pa-elev-raised);font-size:13.5px;color:var(--pa-ink)}
+
+/* ---------- layout ---------- */
+.app{display:flex;height:100vh;overflow:hidden}
+.app__main{flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden}
+.app__scroll{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+.page{padding:24px 32px 32px;display:flex;flex-direction:column;gap:24px}
+.page__head{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.page__actions{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.footer{margin-top:auto;border-top:1px solid var(--pa-line);padding:18px 32px;text-align:center}
+.dates{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px 40px;max-width:720px}
+input[type=date]{font-family:var(--pa-font-display);font-size:13.5px;color:var(--pa-ink);border:0;border-bottom:1px solid var(--pa-field-line);background:transparent;outline:none;padding:4px 0 6px;width:100%}
+input[type=date]:focus{border-bottom:2px solid var(--pa-field-focus);padding-bottom:5px}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <nav class="sb" id="sb">
+    <div class="sb__head">
+      <img class="sb__logo" src="assets/logo-rev.svg" alt="PRIME ADMIN">
+      <i class="mdi mdi-chevron-left sb__collapse" id="collapse" title="Collapse navigation"></i>
+    </div>
+    <div class="sb__section"><div class="sb__item" title="Program Management"><i class="mdi mdi-account-box-outline"></i><span class="sb__label">Program Management</span><i class="mdi mdi-chevron-down sb__item__chev"></i></div></div>
+    <div class="sb__section"><div class="sb__item" title="Marketing"><i class="mdi mdi-chart-line"></i><span class="sb__label">Marketing</span><i class="mdi mdi-chevron-down sb__item__chev"></i></div></div>
+    <div class="sb__section"><div class="sb__item" title="Outcomes"><i class="mdi mdi-view-dashboard"></i><span class="sb__label">Outcomes</span><i class="mdi mdi-chevron-down sb__item__chev"></i></div></div>
+    <div class="sb__section">
+      <div class="sb__item sb__item--active" id="reportingNav" title="Reporting"><i class="mdi mdi-chart-box-outline"></i><span class="sb__label">Reporting</span><i class="mdi mdi-chevron-up sb__item__chev" id="reportingChev"></i></div>
+      <div class="sb__sub" id="reportingSub">
+        <div class="sb__sub-item" data-section="outcomes">Outcomes</div>
+        <div class="sb__sub-item" data-section="marketing">Marketing</div>
+        <div class="sb__sub-item" data-section="program">Program Management</div>
+      </div>
+    </div>
+    <div class="sb__section"><div class="sb__item" title="Tools"><i class="mdi mdi-tools"></i><span class="sb__label">Tools</span><i class="mdi mdi-chevron-down sb__item__chev"></i></div></div>
+    <div class="sb__section"><div class="sb__item" title="User Manager"><i class="mdi mdi-account-key-outline"></i><span class="sb__label">User Manager</span><i class="mdi mdi-chevron-down sb__item__chev"></i></div></div>
+  </nav>
+
+  <div class="app__main">
+    <header class="topbar">
+      <div class="search" style="flex:1;max-width:640px;height:40px">
+        <input placeholder="Search for [Project]">
+        <i class="mdi mdi-magnify" style="color:var(--pa-ink-6);font-size:20px"></i>
+      </div>
+      <button class="pa-btn pa-btn--primary pa-btn--lg"><i class="mdi mdi-plus"></i><span>Create</span></button>
+      <div style="flex:1"></div>
+      <button class="topbar__btn" title="Notifications"><i class="mdi mdi-bell-outline" style="font-size:22px"></i></button>
+      <span class="avatar" title="Signed in">DB</span>
+    </header>
+
+    <div class="app__scroll">
+      <main class="page" id="page"></main>
+      <footer class="footer"><span class="pa-caption" style="font-weight:500">1997–2026 PRIME Education, LLC</span></footer>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================ data ============================ */
+var REPORTS = {
+  outcomes: ["SynopsiMedEd Article Clicks by Project", "Survey Responses with Demographics"],
+  marketing: ["CredSpark Engagement Tracker"],
+  program: ["ConnectED Event Summary Report"]
+};
+
+var PROJECTS = [
+  "10212 -",
+  "84233 - SynopsiMedEd: Leveraging Artificial Intelligence to Stay Up to Date on the Latest Evidence in NSCLC",
+  "72244 - SynopsiMedEd: Harnessing the Power of Artificial Intelligence to Advance Evidence-Based Immunotherapy Treatment in Early-Stage Melanoma",
+  "62241 - SynopsiMedEd: Leveraging Artificial Intelligence to Support Clinicians in Staying Up to Date on New and Emerging Treatments for IgAN Nephropathy",
+  "20241 - SynopsiMedEd: Harnessing the Power of Artificial Intelligence to Accelerate the Adoption of Rapidly Evolving Evidence and Treatment Options for Atopic Dermatitis",
+  "542410 - Beyond the Abstracts: Leveraging the Power of AI to Support Clinicians With Staying Up-to-Date on the Latest Evidence in PBC",
+  "10254 - TEST Project",
+  "24253 - Latest Clinical Evidence in Chronic Spontaneous Urticaria"
+];
+
+var ACTIVITIES = ["54WC259", "54WC260", "23VS255", "23WC255"];
+
+var ROWS = [
+  ["29868","Other","Medical Assistant","Medical Practice","2026-05-11 16:32:24",false,"The optimal treatment for patients with stage I non-small cell lung cancer: minimally invasive lobectomy versus stereotactic ablative radiotherapy - a nationwide cohort study.","https://doi.org/10.1016/j.lungcan.2024.107792"],
+  ["83491","Anesthesiology","Physician","Hospital","2026-05-16 03:34:53",false,"Rationale and design of the SMILe (Spinal Morphine or Intravenous Lidocaine) study: protocol for a multicentre randomised clinical trial in southern Sweden.","https://doi.org/10.1136/bmjopen-2025-113402"],
+  ["435110","Oncology","Nurse","Research / Academia","2026-05-21 00:10:57",false,"Perceived Gaps in Oncologic Emergency Care for Patients with Cancer: A Qualitative Comparison of Emergency Medicine and Oncologist Physician Perspectives.","https://doi.org/10.3390/cancers17050828"],
+  ["464","—","—","—","2026-06-03 12:31:44",true,"Safety and efficacy of pralsetinib in RET fusion-positive non-small cell lung cancer including as first-line therapy: update from the ARROW trial.","https://doi.org/10.1016/j.annonc.2022.08.002"],
+  ["448787","—","—","—","2026-06-29 04:42:35",false,"First-in-human phase 1 study of the anti-TIGIT antibody vibostolimab as monotherapy or with pembrolizumab for advanced solid tumors, including non-small-cell lung cancer.","https://doi.org/10.1016/j.annonc.2021.11.002"],
+  ["462318","Internal Medicine","Physician","Medical Practice","2026-07-10 10:32:04",false,"Intradialytic blood pressure instability and associated factors among hemodialysis patients in Somalia: a retrospective study.","https://doi.org/10.3389/fneph.2026.1822440"],
+  ["464758","Emergency Medicine","Nurse","Hospital","2026-07-15 12:23:01",true,"Tepotinib Efficacy and Safety in Patients with MET Exon 14 Skipping NSCLC: Outcomes in Patient Subgroups from the VISION Study with Relevance for Clinical Practice.","https://doi.org/10.1158/1078-0432.CCR-21-2733"],
+  ["227268","Other","Pharmacist","Community / Retail","2026-08-13 10:00:53",false,"First-line treatments for advanced non-squamous non-small cell lung cancer with immune checkpoint inhibitors plus chemotherapy: a systematic review, network meta-analysis, and cost-effectiveness analysis.","https://doi.org/10.1177/17588359241255613"],
+  ["83641","Family Medicine","Pharmacist","Hospital","2026-08-22 19:30:37",true,"Safety and efficacy of pralsetinib in RET fusion-positive non-small cell lung cancer including as first-line therapy: update from the ARROW trial.","https://doi.org/10.1016/j.annonc.2022.08.002"],
+  ["476056","Oncology","Dietician","Hospital","2026-08-24 21:21:52",false,"Multidisciplinary Team Support for Patients With Head and Neck Cancer Receiving Radiotherapy: A Randomized Clinical Trial.","https://doi.org/10.1001/jamanetworkopen.2025.47590"]
+];
+
+/* 50 preview rows, derived from the sample above */
+var DATA = (function () {
+  var out = [];
+  for (var i = 0; i < 5; i++) {
+    ROWS.forEach(function (r, j) {
+      var row = r.slice();
+      row[0] = String(parseInt(r[0], 10) + i * 137 + j);
+      var d = new Date(r[4].replace(" ", "T") + "Z");
+      d.setUTCDate(d.getUTCDate() - i * 6);
+      row[4] = d.toISOString().slice(0, 19).replace("T", " ");
+      out.push(row);
+    });
+  }
+  return out;
+})();
+
+var TITLES = {
+  outcomes: "Reporting outcomes",
+  marketing: "Reporting marketing",
+  program: "Program management reports"
+};
+
+/* ============================ state ============================ */
+var state = {
+  collapsed: false, reportingOpen: true, section: "outcomes",
+  report: "", project: "", activities: [], start: "", end: "", activityCode: "",
+  menu: null, previewed: false, page: 1, perPage: 10, gen: "idle", toast: ""
+};
+var genTimer, toastTimer;
+
+function set(patch, keepGen) {
+  if (!keepGen) { clearTimeout(genTimer); patch.gen = "idle"; }
+  Object.keys(patch).forEach(function (k) { state[k] = patch[k]; });
+  render();
+}
+
+function esc(s) {
+  return String(s).replace(/[&<>"]/g, function (c) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+  });
+}
+
+function ready() {
+  if (state.report === REPORTS.outcomes[0]) return !!state.project;
+  if (state.report === REPORTS.outcomes[1]) return state.activities.length > 0;
+  if (state.report === REPORTS.marketing[0]) return true;
+  if (state.report === REPORTS.program[0]) return state.activityCode.trim().length > 0;
+  return false;
+}
+
+function flash(msg) {
+  state.toast = msg; render();
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function () { state.toast = ""; render(); }, 4000);
+}
+
+function runGenerate() {
+  if (state.gen === "ready") { flash("Report downloaded."); return; }
+  set({ gen: "working", menu: null }, true);
+  clearTimeout(genTimer);
+  genTimer = setTimeout(function () { set({ gen: "ready" }, true); }, 2600);
+}
+
+/* ============================ render ============================ */
+function render() {
+  var s = state, reports = REPORTS[s.section] || [], isOutcomes = s.section === "outcomes";
+  var ok = ready();
+
+  /* sidebar */
+  var sb = document.getElementById("sb");
+  sb.classList.toggle("sb--collapsed", s.collapsed);
+  document.getElementById("collapse").className = "mdi sb__collapse " + (s.collapsed ? "mdi-chevron-right" : "mdi-chevron-left");
+  document.getElementById("reportingChev").className = "mdi sb__item__chev " + (s.reportingOpen ? "mdi-chevron-up" : "mdi-chevron-down");
+  document.getElementById("reportingSub").style.display = s.reportingOpen && !s.collapsed ? "block" : "none";
+  Array.prototype.forEach.call(document.querySelectorAll(".sb__sub-item"), function (el) {
+    el.classList.toggle("sb__sub-item--active", el.dataset.section === s.section);
+  });
+
+  var genLabel = s.gen === "working" ? "Generating…" : s.gen === "ready" ? "Download report" : "Generate report";
+  var genIcon = s.gen === "working" ? "mdi-loading" : s.gen === "ready" ? "mdi-download" : "mdi-cog-play-outline";
+  var genStyle = s.gen === "working" ? "animation:pa-spin 900ms linear infinite" : "";
+
+  var html = '<div class="page__head"><h1 class="pa-page-title">' + esc(TITLES[s.section]) + '</h1><div class="page__actions">';
+  if (isOutcomes) {
+    html += '<button class="pa-btn pa-btn--secondary pa-btn--lg" data-act="preview"' +
+      (!ok || s.report !== REPORTS.outcomes[0] ? " disabled" : "") + '><span>Preview</span></button>';
+  }
+  html += '<button class="pa-btn pa-btn--primary pa-btn--lg" data-act="gen" style="min-width:196px"' +
+    (!ok || s.gen === "working" ? " disabled" : "") + '><i class="mdi ' + genIcon + '" style="' + genStyle + '"></i><span>' + genLabel + '</span></button>';
+  html += "</div></div>";
+
+  /* report card */
+  html += '<div class="pa-card pa-card--form"><div style="padding:20px 24px 22px;position:relative;z-index:12">' +
+    '<div class="pa-field-label--float">Report Type</div><div class="field">' +
+    '<div class="field__control" data-act="menu" data-menu="report">' +
+    '<span class="pa-input-text" style="flex:1;min-width:0' + (s.report ? "" : ";color:var(--pa-ink-6)") + '">' +
+    esc(s.report || "Select a report type") + '</span>' +
+    '<i class="mdi ' + (s.menu === "report" ? "mdi-menu-up" : "mdi-menu-down") + '" style="font-size:20px;color:var(--pa-ink-3)"></i></div>';
+  if (s.menu === "report") {
+    html += '<div class="scrim" data-act="close"></div><div class="menu">' + reports.map(function (label) {
+      return '<div class="menu__item' + (label === s.report ? " menu__item--on" : "") + '" data-act="pick-report" data-value="' + esc(label) + '">' + esc(label) + "</div>";
+    }).join("") + "</div>";
+  }
+  html += "</div>";
+
+  if (s.report === REPORTS.program[0]) {
+    html += '<div style="padding-top:22px"><div class="pa-field-label--float">Activity Code</div>' +
+      '<input class="field__input" id="activityCode" value="' + esc(s.activityCode) + '" placeholder="e.g. 23LV262"></div>';
+  }
+  html += "</div>";
+
+  /* filters (outcomes only) */
+  if (isOutcomes && s.report) {
+    var hint = s.report === REPORTS.outcomes[1] ? "One or more activities required" : "Project required · date range optional";
+    html += '<div><div class="pa-band" style="border-top:1px solid var(--pa-line)"><h2 class="pa-band-title">Filters</h2>' +
+      '<span class="pa-caption" style="margin-left:auto">' + hint + "</span></div>" +
+      '<div style="padding:24px;display:flex;flex-direction:column;gap:24px;position:relative;z-index:8">';
+
+    if (s.report === REPORTS.outcomes[0]) {
+      html += '<div class="field"><div class="pa-field-label--float">Project</div>' +
+        '<div class="field__control" data-act="menu" data-menu="project">' +
+        (s.project
+          ? '<span class="chip"><span>' + esc(s.project) + '</span><i class="mdi mdi-close" data-act="clear-project"></i></span>'
+          : '<span class="pa-input-text" style="color:var(--pa-ink-6)">Select a project</span>') +
+        '<span style="flex:1"></span><i class="mdi ' + (s.menu === "project" ? "mdi-menu-up" : "mdi-menu-down") + '" style="font-size:20px;color:var(--pa-ink-3)"></i></div>';
+      if (s.menu === "project") {
+        html += '<div class="scrim" data-act="close"></div><div class="menu">' + PROJECTS.map(function (label) {
+          return '<div class="menu__item' + (label === s.project ? " menu__item--on" : "") + '" data-act="pick-project" data-value="' + esc(label) + '">' + esc(label) + "</div>";
+        }).join("") + "</div>";
+      }
+      html += "</div>" +
+        '<div class="dates"><div><div class="pa-field-label--float">Start Date</div>' +
+        '<input type="date" id="start" value="' + esc(s.start) + '"></div>' +
+        '<div><div class="pa-field-label--float">End Date</div>' +
+        '<input type="date" id="end" value="' + esc(s.end) + '"></div></div>';
+    }
+
+    if (s.report === REPORTS.outcomes[1]) {
+      html += '<div class="field"><div class="pa-field-label--float">Search Activities</div>' +
+        '<div class="field__control" style="flex-wrap:wrap;gap:8px" data-act="menu" data-menu="activities">' +
+        s.activities.map(function (a) {
+          return '<span class="chip"><span>' + esc(a) + '</span><i class="mdi mdi-close" data-act="remove-activity" data-value="' + esc(a) + '"></i></span>';
+        }).join("") +
+        (s.activities.length ? "" : '<span class="pa-input-text" style="color:var(--pa-ink-6)">Search activities</span>') +
+        '<span style="flex:1"></span><i class="mdi ' + (s.menu === "activities" ? "mdi-menu-up" : "mdi-menu-down") + '" style="font-size:20px;color:var(--pa-ink-3)"></i></div>';
+      if (s.menu === "activities") {
+        html += '<div class="scrim" data-act="close"></div><div class="menu">' + ACTIVITIES.map(function (a) {
+          var on = s.activities.indexOf(a) > -1;
+          return '<div class="menu__item" data-act="toggle-activity" data-value="' + esc(a) + '">' +
+            '<i class="mdi ' + (on ? "mdi-checkbox-marked" : "mdi-checkbox-blank-outline") + '" style="font-size:20px;color:' + (on ? "#000" : "var(--pa-ink-6)") + '"></i>' +
+            "<span>" + esc(a) + "</span></div>";
+        }).join("") + "</div>";
+      }
+      html += "</div>";
+    }
+    html += "</div></div>";
+  }
+  html += "</div>"; /* /card */
+
+  /* results */
+  var showResults = isOutcomes && ok && s.previewed && s.report === REPORTS.outcomes[0];
+  if (showResults) {
+    var pageCount = Math.max(1, Math.ceil(DATA.length / s.perPage));
+    var page = Math.min(s.page, pageCount);
+    var from = (page - 1) * s.perPage, to = Math.min(from + s.perPage, DATA.length);
+    var range = (from + 1) + "-" + to + " of " + DATA.length;
+
+    var bar = function (footer) {
+      var out = '<div class="pa-tablebar' + (footer ? " pa-tablebar--footer" : "") + '"><span>' + range + "</span>" +
+        '<span style="display:flex;align-items:center;gap:10px">Rows per page: <select data-act="per-page">' +
+        [10, 25, 50].map(function (n) {
+          return '<option value="' + n + '"' + (n === s.perPage ? " selected" : "") + ">" + n + "</option>";
+        }).join("") + "</select></span>" +
+        '<div class="pa-pager"><button title="Previous page" data-act="prev"' + (page <= 1 ? " disabled" : "") +
+        '><i class="mdi mdi-chevron-left" style="font-size:20px;vertical-align:-4px"></i></button>';
+      for (var n = 1; n <= pageCount; n++) {
+        out += "<button" + (n === page ? ' aria-current="page"' : "") + ' data-act="page" data-value="' + n + '">' + n + "</button>";
+      }
+      out += '<button title="Next page" data-act="next"' + (page >= pageCount ? " disabled" : "") +
+        '><i class="mdi mdi-chevron-right" style="font-size:20px;vertical-align:-4px"></i></button></div></div>';
+      return out;
+    };
+
+    html += '<section style="display:flex;flex-direction:column">' +
+      '<div style="display:flex;align-items:baseline;gap:12px;padding-bottom:4px">' +
+      '<h2 class="pa-rail-title">SynopsiMedEd Article Clicks</h2>' +
+      '<span class="pa-caption">Preview of the file this report will generate</span></div>' +
+      bar(false) +
+      '<div style="overflow-x:auto"><table class="pa-ltable" style="min-width:1180px"><thead><tr>' +
+      '<th style="width:88px">User Id</th><th style="width:128px">Specialty</th><th style="width:116px">Profession</th>' +
+      '<th style="width:140px">Practice Setting</th><th style="width:132px">Date Clicked</th><th style="width:112px">Accredited</th>' +
+      '<th style="min-width:320px">Article Title</th><th style="width:250px">Article URL</th></tr></thead><tbody>' +
+      DATA.slice(from, to).map(function (r) {
+        return "<tr><td class='num'>" + esc(r[0]) + "</td><td>" + esc(r[1]) + "</td><td>" + esc(r[2]) + "</td><td>" + esc(r[3]) + "</td>" +
+          "<td class='num' style=\"font-family:var(--pa-font-display)\">" + esc(r[4]) + "</td>" +
+          '<td><span class="pa-status" style="color:' + (r[5] ? "var(--pa-success)" : "var(--pa-ink-4)") + '">' + (r[5] ? "True" : "False") + "</span></td>" +
+          "<td class='desc'>" + esc(r[6]) + "</td>" +
+          '<td><a href="#" style="font-size:12.5px;word-break:break-all">' + esc(r[7]) + "</a></td></tr>";
+      }).join("") +
+      "</tbody></table></div>" + bar(true) + "</section>";
+  } else if (isOutcomes && s.report === REPORTS.outcomes[0]) {
+    html += '<div class="pa-empty"><i class="mdi mdi-table-eye"></i><div class="pa-empty__title">No Preview Yet</div>' +
+      '<div class="pa-empty__body">Set the filters, then run Preview to check the first rows before generating the full download.</div></div>';
+  }
+
+  if (s.toast) html += '<div class="pa-toast">' + esc(s.toast) + "</div>";
+
+  document.getElementById("page").innerHTML = html;
+}
+
+/* ============================ events ============================ */
+document.getElementById("collapse").addEventListener("click", function () {
+  set({ collapsed: !state.collapsed, menu: null }, true);
+});
+document.getElementById("reportingNav").addEventListener("click", function () {
+  set({ reportingOpen: !state.reportingOpen }, true);
+});
+Array.prototype.forEach.call(document.querySelectorAll(".sb__sub-item"), function (el) {
+  el.addEventListener("click", function () {
+    clearTimeout(genTimer);
+    set({
+      section: el.dataset.section, menu: null, report: "", project: "", activities: [],
+      start: "", end: "", activityCode: "", previewed: false, page: 1
+    });
+  });
+});
+
+document.getElementById("page").addEventListener("click", function (e) {
+  var el = e.target.closest("[data-act]");
+  if (!el) return;
+  var act = el.dataset.act, val = el.dataset.value;
+
+  if (act === "menu") { set({ menu: state.menu === el.dataset.menu ? null : el.dataset.menu }, true); return; }
+  if (act === "close") { set({ menu: null }, true); return; }
+  if (act === "pick-report") { set({ report: val, menu: null, previewed: false, page: 1 }); return; }
+  if (act === "pick-project") { set({ project: val, menu: null, previewed: false }); return; }
+  if (act === "clear-project") { e.stopPropagation(); set({ project: "", previewed: false }); return; }
+  if (act === "toggle-activity") {
+    var on = state.activities.indexOf(val) > -1;
+    set({ activities: on ? state.activities.filter(function (a) { return a !== val; }) : state.activities.concat(val), previewed: false });
+    return;
+  }
+  if (act === "remove-activity") {
+    e.stopPropagation();
+    set({ activities: state.activities.filter(function (a) { return a !== val; }), previewed: false });
+    return;
+  }
+  if (act === "preview") { set({ previewed: true, menu: null, page: 1 }, true); flash("Preview generated from the first rows."); return; }
+  if (act === "gen") { runGenerate(); return; }
+  if (act === "prev") { set({ page: Math.max(1, state.page - 1) }, true); return; }
+  if (act === "next") { set({ page: state.page + 1 }, true); return; }
+  if (act === "page") { set({ page: parseInt(val, 10) }, true); return; }
+});
+
+document.getElementById("page").addEventListener("change", function (e) {
+  if (e.target.dataset.act === "per-page") { set({ perPage: parseInt(e.target.value, 10), page: 1 }, true); return; }
+  if (e.target.id === "start") { set({ start: e.target.value, previewed: false }); return; }
+  if (e.target.id === "end") { set({ end: e.target.value, previewed: false }); return; }
+  if (e.target.id === "activityCode") { set({ activityCode: e.target.value }); }
+});
+
+render();
+</script>
+</body>
+</html>
