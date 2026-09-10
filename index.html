@@ -483,7 +483,7 @@ document.getElementById("page").addEventListener("click", function (e) {
     set({ activities: state.activities.filter(function (a) { return a !== val; }), previewed: false });
     return;
   }
-  if (act === "preview") { set({ previewed: true, menu: null, page: 1 }, true); flash("Preview generated from the first rows."); return; }
+  if (act === "preview") { set({ previewed: true, menu: null, page: 1 }, true); return; }
   if (act === "gen") { runGenerate(); return; }
   if (act === "prev") { set({ page: Math.max(1, state.page - 1) }, true); return; }
   if (act === "next") { set({ page: state.page + 1 }, true); return; }
